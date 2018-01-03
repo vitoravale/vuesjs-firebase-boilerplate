@@ -11,6 +11,7 @@ export default {
   name: 'Login',
   data() {
     return {
+      isCollapse: true,
     };
   },
   methods: Object.assign(
@@ -23,7 +24,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
 </style>
 
 
