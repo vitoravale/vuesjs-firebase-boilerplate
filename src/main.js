@@ -1,3 +1,4 @@
+import 'reset-css/reset.css';
 import 'element-ui/lib/theme-chalk/index.css';
 import Vue from 'vue';
 import VueResource from 'vue-resource';
