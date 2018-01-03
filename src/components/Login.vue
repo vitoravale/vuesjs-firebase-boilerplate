@@ -1,8 +1,7 @@
 <template>
-  <md-app-content>
-login
-      </md-app-content>
-
+  <div>
+    login
+  </div>
 </template>
 
 <script>
@@ -12,9 +11,6 @@ export default {
   name: 'Login',
   data() {
     return {
-      email: '',
-      password: '',
-      loading: false,
     };
   },
   methods: Object.assign(
