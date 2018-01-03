@@ -1,16 +1,13 @@
 import firebase from 'firebase';
 import debug from 'debug';
-import ms from 'ms';
+import { Notification } from 'element-ui';
 
 // eslint-disable-next-line
 const loginSuccess = (commit) => {
   return (result) => {
     debug('store.login')(result);
     commit('setLogin', result.user);
-    commit('loginWelcome', result.user.displayName);
-    setTimeout(() => {
-      commit('loginWelcome', null);
-    }, ms('10s'));
+    commit('loginWelcome');
   };
 };
 
@@ -18,10 +15,7 @@ const loginSuccess = (commit) => {
 const loginError = (commit) => {
   return (error) => {
     debug('store.login')(error);
-    commit('loginFail', true);
-    setTimeout(() => {
-      commit('loginFail', false);
-    }, ms('10s'));
+    commit('loginFail');
   };
 };
 
@@ -29,14 +23,29 @@ const mutations = {
   setLogin: (state, data) => {
     state.user = data;
   },
-  loginWelcome: (state, data) => {
-    state.welcomeMessage = data && data.length ? `Bem vindo ${data}` : null;
+  loginWelcome: (state) => {
+    Notification({
+      title: 'Olá :)',
+      message: `${state.user.displayName}`,
+      type: 'success',
+    });
   },
-  loginWelcomeBack: (state, data) => {
-    state.welcomeMessage = data && data.length ? `Bem vindo de volta ${data}` : null;
+  loginWelcomeBack: (state) => {
+    Notification({
+      title: 'Bem vindo',
+      message: `${state.user.displayName}`,
+      type: 'success',
+    });
   },
-  loginFail: (state, data) => {
-    state.loginError = data || false;
+  loginFail: () => {
+    Notification({
+      title: 'Falha',
+      message: 'Não foi possível realizar seu acesso',
+      type: 'error',
+    });
+  },
+  setFind: (state, data) => {
+    state.find = data || false;
   },
 };
 
@@ -66,29 +75,34 @@ const actions = {
       .then(loginSuccess(commit), loginError(commit));
   },
   restoreLogin: ({ commit }) => {
+    commit('setFind', true);
     firebase.auth()
       .onAuthStateChanged((user) => {
-        commit('setLogin', user);
-        commit('loginWelcomeBack', user.displayName);
-        setTimeout(() => {
-          commit('loginWelcomeBack', null);
-        }, ms('10s'));
-      }, loginError(commit));
+        if (user) {
+          commit('setLogin', user);
+          commit('loginWelcomeBack');
+        }
+        commit('setFind', false);
+      }, () => {
+        commit('setFind', false);
+      });
   },
   logOut: ({ commit }) => {
-    commit('setLogin', null);
+    firebase.auth().signOut().then(() => {
+      commit('setLogin', null);
+    });
   },
 };
 
 const getters = {
   isLogged: state => state.user != null,
   loggedUser: state => state.user,
+  findPreviousLogin: state => state.find,
 };
 
 const state = {
   user: null,
-  welcomeMessage: null,
-  loginError: false,
+  find: false,
 };
 
 export default {
